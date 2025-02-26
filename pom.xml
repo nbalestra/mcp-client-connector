@@ -6,7 +6,9 @@
     <modelVersion>4.0.0</modelVersion>
     <groupId>com.mulesoft.connectors</groupId>
     <artifactId>mule-mcp-connector</artifactId>
-    <version>0.0.1-SNAPSHOT-28</version>
+<!--    <version>0.0.1-SNAPSHOT-28</version>-->
+    <version>0.0.1-SNAPSHOT</version>
+
     <packaging>mule-extension</packaging>
     <name>Mule MCP Connector</name>
 

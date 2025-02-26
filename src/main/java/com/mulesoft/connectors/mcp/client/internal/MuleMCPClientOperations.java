@@ -21,7 +21,6 @@ import org.slf4j.LoggerFactory;
 
 
 import javax.inject.Inject;
-import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -98,13 +97,13 @@ public class MuleMCPClientOperations {
       throw new ModuleException(createStaticMessage("Error while generating output for getPrompts:  " + jpe.getMessage()), McpClientError.MCP_CLIENT_ERROR);
     }
     catch (McpError me){
+      String error = "";
       if (me.getJsonRpcError().code() == -32601){
-          LOGGER.debug("Server return 'Method not found' which means the server doesn't have prompts in its capabilities");
-          return new LinkedHashMap<>();
+        error = "Server return 'Method not found' which means the server doesn't have prompts in its capabilities";
       } else {
-        throw new ModuleException(createStaticMessage("JSONRPC error when talking to the server: :  " + me.getJsonRpcError().message() + " [" + + me.getJsonRpcError().code() + "]"), McpClientError.MCP_CLIENT_ERROR);
+        error = String.format("JSONRPC error when talking to the server: :  %s [%d]",  me.getJsonRpcError().message(),  me.getJsonRpcError().code());
       }
-
+      throw new ModuleException(createStaticMessage(error), McpClientError.MCP_CLIENT_ERROR);
     }
   }
 
@@ -124,14 +123,15 @@ public class MuleMCPClientOperations {
       throw new ModuleException(createStaticMessage("Error while generating output for getPrompt:  " + jpe.getMessage()), McpClientError.MCP_CLIENT_ERROR);
     }
     catch (McpError me){
+      String error = "";
       if (me.getJsonRpcError().code() == -32601){
-        LOGGER.debug("Server return 'Method not found' which means the server doesn't have prompts in its capabilities");
-        return "";
+        error = "Server return 'Method not found' which means the server doesn't have prompts in its capabilities";
       } else {
-        throw new ModuleException(createStaticMessage("JSONRPC error when talking to the server: :  " + me.getJsonRpcError().message() + " [" + + me.getJsonRpcError().code() + "]"), McpClientError.MCP_CLIENT_ERROR);
+        error = String.format("JSONRPC error when talking to the server: :  %s [%d]",  me.getJsonRpcError().message(),  me.getJsonRpcError().code());
       }
-
+      throw new ModuleException(createStaticMessage(error), McpClientError.MCP_CLIENT_ERROR);
     }
+
   }
 
   @MediaType(value = ANY, strict = false)
@@ -157,13 +157,15 @@ public class MuleMCPClientOperations {
       List<McpSchema.Resource> resources = client.listResources().resources();
       return mapper.convertValue(resources, LinkedHashMap.class);
 
-    } catch (McpError me){
+    }
+    catch (McpError me){
+      String error = "";
       if (me.getJsonRpcError().code() == -32601){
-        LOGGER.debug("Server return 'Method not found' which means the server doesn't have resources in its capabilities");
-        return new LinkedHashMap<>();
+        error = "Server return 'Method not found' which means the server doesn't have resources in its capabilities";
       } else {
-        throw new ModuleException(createStaticMessage("JSONRPC error when talking to the server: :  " + me.getJsonRpcError().message() + " [" + + me.getJsonRpcError().code() + "]"), McpClientError.MCP_CLIENT_ERROR);
+        error = String.format("JSONRPC error when talking to the server: :  %s [%d]",  me.getJsonRpcError().message(),  me.getJsonRpcError().code());
       }
+      throw new ModuleException(createStaticMessage(error), McpClientError.MCP_CLIENT_ERROR);
     }
   }
 
@@ -178,12 +180,33 @@ public class MuleMCPClientOperations {
       return client.readResource(request).contents();
     }
     catch (McpError me){
+      String error = "";
       if (me.getJsonRpcError().code() == -32601){
-        LOGGER.debug("Server return 'Method not found' which means the server doesn't have resources in its capabilities");
-        return new ArrayList<>();
+        error = "Server return 'Method not found' which means the server doesn't have resources in its capabilities";
       } else {
-        throw new ModuleException(createStaticMessage("JSONRPC error when talking to the server: :  " + me.getJsonRpcError().message() + " [" + + me.getJsonRpcError().code() + "]"), McpClientError.MCP_CLIENT_ERROR);
+        error = String.format("JSONRPC error when talking to the server: :  %s [%d]",  me.getJsonRpcError().message(),  me.getJsonRpcError().code());
       }
+      throw new ModuleException(createStaticMessage(error), McpClientError.MCP_CLIENT_ERROR);
+    }
+  }
+
+
+  @MediaType(value = ANY, strict = false)
+  @OutputResolver(output= McpOutputResolver.class)
+  public void addRoot(String uri, String name, @Config MuleMCPClientConfiguration config, @Connection MuleMCPClientConnection connection){
+    McpSyncClient client = connection.getMcpClient();
+    McpSchema.Root root = new McpSchema.Root(uri, name);
+    try {
+      client.addRoot(root);
+    }
+    catch (McpError me){
+      String error = "";
+      if (me.getJsonRpcError().code() == -32601){
+        error = "Server return 'Method not found' which means the server doesn't have the ability to add roots in its capabilities";
+      } else {
+        error = String.format("JSONRPC error when talking to the server: :  %s [%d]",  me.getJsonRpcError().message(),  me.getJsonRpcError().code());
+      }
+      throw new ModuleException(createStaticMessage(error), McpClientError.MCP_CLIENT_ERROR);
     }
   }
 

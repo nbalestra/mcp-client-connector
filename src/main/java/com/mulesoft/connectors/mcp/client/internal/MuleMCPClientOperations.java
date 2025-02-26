@@ -9,7 +9,6 @@ import com.mulesoft.connectors.mcp.client.internal.config.MuleMCPClientConfigura
 import io.modelcontextprotocol.client.McpSyncClient;
 import io.modelcontextprotocol.spec.McpError;
 import io.modelcontextprotocol.spec.McpSchema;
-import org.apache.avro.util.MapEntry;
 import org.mule.runtime.api.transformation.TransformationService;
 import org.mule.runtime.extension.api.annotation.error.Throws;
 import org.mule.runtime.extension.api.annotation.metadata.OutputResolver;
@@ -19,7 +18,6 @@ import org.mule.runtime.extension.api.annotation.param.MediaType;
 import org.mule.runtime.extension.api.exception.ModuleException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.jmx.support.ObjectNameManager;
 
 
 import javax.inject.Inject;
@@ -168,6 +166,28 @@ public class MuleMCPClientOperations {
       }
     }
   }
+
+  @MediaType(value = ANY, strict = false)
+  @OutputResolver(output= McpOutputResolver.class)
+  public List<McpSchema.ResourceContents> getResource(String resourceURI, @Config MuleMCPClientConfiguration config, @Connection MuleMCPClientConnection connection){
+    McpSyncClient client = connection.getMcpClient();
+
+    McpSchema.ReadResourceRequest request = new McpSchema.ReadResourceRequest(resourceURI);
+    //McpSchema.Resource res = new McpSchema.Resource()
+    try {
+      return client.readResource(request).contents();
+    }
+    catch (McpError me){
+      if (me.getJsonRpcError().code() == -32601){
+        LOGGER.debug("Server return 'Method not found' which means the server doesn't have resources in its capabilities");
+        return new ArrayList<>();
+      } else {
+        throw new ModuleException(createStaticMessage("JSONRPC error when talking to the server: :  " + me.getJsonRpcError().message() + " [" + + me.getJsonRpcError().code() + "]"), McpClientError.MCP_CLIENT_ERROR);
+      }
+    }
+  }
+
+
 //  /**
 //   * Example of an operation that uses the configuration and a connection instance to perform some action.
 //   */

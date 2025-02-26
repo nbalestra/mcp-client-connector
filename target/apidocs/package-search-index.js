@@ -1,1 +1,0 @@
-packageSearchIndex = [{"l":"All Packages","u":"allpackages-index.html"},{"l":"com.mulesoft.connectors.mcp.client.api"},{"l":"com.mulesoft.connectors.mcp.client.api.configuration"},{"l":"com.mulesoft.connectors.mcp.client.internal"},{"l":"com.mulesoft.connectors.mcp.client.internal.config"}];updateSearchResults();
